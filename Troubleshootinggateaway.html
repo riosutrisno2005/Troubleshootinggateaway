@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Troubleshooting Gateway &amp; NAT</title>
+    <style>
+        /* --- RESET & BASE --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #000000;
+            line-height: 1.6;
+            padding: 25px 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            padding: 35px 50px;
+        }
+
+        /* --- SEMUA TEKS WARNA HITAM --- */
+        body, p, li, h1, h2, h3, h4, h5, th, td, .table-caption, figcaption, .footer-note,
+        strong, b, i, span, div, pre, code, .container *, .note, .footer, table, thead, tbody, tr {
+            color: #000000 !important;
+        }
+
+        /* --- FONT SIZES (Rasio 1.618, acuan paragraf 12pt) --- */
+        p {
+            font-size: 12pt;
+            margin-bottom: 0.5rem;
+            text-align: justify;
+            text-indent: 2em;
+            line-height: 1.6;
+        }
+        p.no-indent {
+            text-indent: 0;
+        }
+        li {
+            font-size: 12pt;
+            margin: 0.2rem 0;
+            text-align: justify;
+            line-height: 1.6;
+        }
+        h4 {
+            font-size: 14pt;
+            font-weight: 600;
+            margin: 16px 0 6px 0;
+            letter-spacing: 0.2px;
+        }
+        h3 {
+            font-size: 16pt;
+            font-weight: 600;
+            margin: 18px 0 8px 0;
+            letter-spacing: 0.2px;
+        }
+        h2 {
+            font-size: 22pt;
+            font-weight: 600;
+            margin: 24px 0 10px 0;
+            padding-bottom: 0;
+            border-bottom: none;
+            letter-spacing: 0.3px;
+        }
+        h1 {
+            font-size: 28pt;
+            font-weight: 700;
+            border-left: none;
+            padding-left: 0;
+            margin-bottom: 16px;
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+        }
+
+        /* Elemen pendukung */
+        .note {
+            background: #f0f4fa;
+            padding: 10px 16px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: none;
+        }
+        .note strong {
+            color: #000000 !important;
+        }
+        code {
+            background: #f0f2f5;
+            padding: 1px 8px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 10.5pt;
+            color: #000000 !important;
+        }
+        pre {
+            background: #f0f2f5;
+            color: #000000 !important;
+            padding: 12px 16px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 10px 0 12px 0;
+            font-family: 'Courier New', 'Fira Code', monospace;
+            font-size: 10pt;
+            white-space: pre-wrap;
+            word-break: break-word;
+            border: none;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            font-size: 10pt;
+            color: #000000 !important;
+            white-space: pre-wrap;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 10.5pt;
+        }
+        th, td {
+            border: none;
+            padding: 6px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background: #f0f2f5;
+            font-weight: 700;
+        }
+        tr:nth-child(even) td {
+            background: #f8f9fb;
+        }
+        figure {
+            margin: 16px 0;
+            text-align: center;
+            background: #f8f9fb;
+            border-radius: 12px;
+            padding: 12px 12px 8px;
+            border: none;
+            box-shadow: none;
+        }
+        figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        figcaption {
+            font-size: 10pt;
+            margin-top: 6px;
+            font-style: italic;
+            font-weight: 500;
+        }
+        .footer {
+            font-size: 9pt;
+            text-align: center;
+            margin-top: 6px;
+        }
+        .table-wrap {
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        .sub {
+            margin-left: 20px;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px 22px;
+            }
+            h1 { font-size: 24pt; }
+            h2 { font-size: 19pt; }
+            h3 { font-size: 14pt; }
+            h4 { font-size: 12.5pt; }
+            p, li { font-size: 11.5pt; }
+            code { font-size: 10pt; }
+            table { font-size: 10pt; }
+            th, td { padding: 5px 8px; }
+            .note { padding: 8px 12px; }
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px 14px;
+                border-radius: 12px;
+            }
+            h1 { font-size: 20pt; margin-bottom: 12px; }
+            h2 { font-size: 16pt; margin: 18px 0 8px 0; }
+            h3 { font-size: 12pt; margin: 14px 0 6px 0; }
+            h4 { font-size: 11pt; margin: 12px 0 4px 0; }
+            p, li { font-size: 11pt; }
+            code { font-size: 9.5pt; }
+            table { font-size: 9pt; }
+            th, td { padding: 4px 6px; }
+            .note { padding: 6px 10px; }
+            pre { font-size: 9pt; padding: 8px 12px; }
+            pre code { font-size: 9pt; }
+        }
+
+        /* --- STYLE LAINNYA (tanpa garis) --- */
+        ul, ol {
+            margin: 0.3rem 0 0.5rem 1.8rem;
+        }
+        hr {
+            display: none;
+        }
+        i {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>Troubleshooting Gateway &amp; NAT</h1>
+    <p style="font-size:10pt; color:#000000;"><em>Panduan lengkap mendiagnosis, menganalisis, dan memperbaiki permasalahan pada Internet Gateway dan Network Address Translation (NAT).</em></p>
+
+    <figure>
+        <img src="1tg.png" alt="Topologi Jaringan Internet Gateway dengan Router Mikrotik, Switch, dan Server">
+        <figcaption>Topologi Jaringan Internet Gateway – Router Mikrotik, Switch, dan Server Lokal</figcaption>
+    </figure>
+
+    <h2>Pendahuluan</h2>
+    <p><strong>Internet Gateway</strong> adalah perangkat (bisa berupa router atau server) yang menghubungkan jaringan lokal (LAN) ke jaringan publik (internet). Sedangkan <strong>NAT (Network Address Translation)</strong> adalah mekanisme yang memungkinkan banyak perangkat dengan IP privat dapat mengakses internet melalui satu atau beberapa IP publik. Troubleshooting pada gateway dan NAT menjadi keterampilan krusial bagi administrator jaringan, karena kegagalan pada komponen ini akan melumpuhkan akses internet seluruh klien di jaringan lokal.</p>
+
+    <p>Pada topologi di atas, Router Mikrotik bertindak sebagai gateway. <strong>Ether1-publik</strong> terhubung ke internet dengan IP publik (misal 202.123.123.x), sedangkan <strong>Ether2-lokal</strong> terhubung ke switch dan melayani jaringan lokal 192.168.88.0/24. Server dan klien menggunakan gateway 192.168.88.1 serta DNS yang sama. NAT berperan menerjemahkan IP privat 192.168.88.x menjadi IP publik saat keluar ke internet.</p>
+
+    <h2>A. Prosedur dan Teknik Pemeriksaan Permasalahan pada Internet Gateway</h2>
+
+    <h3>1. Pendekatan Sistematis Troubleshooting</h3>
+    <p>Proses troubleshooting yang efektif mengikuti langkah-langkah berikut:</p>
+    <ol>
+        <li><strong>Kumpulkan informasi</strong> – catat gejala, waktu kejadian, perubahan terakhir, dan konfigurasi yang berlaku.</li>
+        <li><strong>Lokalisasi masalah</strong> – tentukan apakah masalah terjadi di sisi fisik (kabel, port), perangkat (switch/router), atau konfigurasi (IP, routing, NAT).</li>
+        <li><strong>Isolasi komponen</strong> – pisahkan perangkat keras, perangkat lunak, dan akun pengguna untuk mengidentifikasi sumber utama.</li>
+        <li><strong>Perbaiki</strong> – terapkan solusi yang tepat, baik dengan konfigurasi ulang, penggantian hardware, atau penyesuaian aturan firewall.</li>
+        <li><strong>Verifikasi</strong> – uji kembali koneksi dan pastikan masalah benar-benar terselesaikan.</li>
+        <li><strong>Dokumentasi</strong> – catat penyebab dan solusi untuk referensi di masa mendatang.</li>
+    </ol>
+
+    <h3>2. Permasalahan Umum pada Gateway dan NAT</h3>
+    <p>Berikut adalah jenis-jenis masalah yang paling sering dijumpai:</p>
+    <ul>
+        <li><strong>Koneksi fisik bermasalah</strong> – kabel putus, konektor longgar, atau port switch/router mati.</li>
+        <li><strong>Konfigurasi IP salah</strong> – gateway default tidak sesuai, subnet mask keliru, atau IP duplikat.</li>
+        <li><strong>Routing tidak aktif</strong> – fitur IP forwarding (ip_forward) tidak diaktifkan pada Linux, atau routing dinamis tidak berjalan.</li>
+        <li><strong>Aturan NAT tidak tepat</strong> – rule MASQUERADE atau SNAT tidak ada, atau salah interface.</li>
+        <li><strong>Firewall memblokir</strong> – aturan filter di iptables atau firewall router menghalangi lalu lintas.</li>
+        <li><strong>DNS tidak berfungsi</strong> – client tidak bisa meresolve nama domain karena DNS server tidak dapat diakses.</li>
+        <li><strong>Keterbatasan resource</strong> – overload koneksi, connection tracking penuh, atau bandwidth habis.</li>
+    </ul>
+
+    <h3>3. Alat Bantu (Tools) Diagnostik</h3>
+    <p>Beberapa <em>tools</em> yang sangat berguna untuk mendiagnosis masalah gateway dan NAT:</p>
+    <ul>
+        <li><strong>ipconfig / ifconfig</strong> – melihat konfigurasi IP pada client dan server.</li>
+        <li><strong>ping</strong> – menguji konektivitas dasar ke gateway, DNS, dan internet (misal <code>ping 8.8.8.8</code>).</li>
+        <li><strong>tracert / traceroute</strong> – melacak jalur paket untuk mengetahui di hop mana paket terhenti.</li>
+        <li><strong>netstat / ss</strong> – melihat koneksi aktif dan port yang terbuka.</li>
+        <li><strong>iptables -L -t nat</strong> – menampilkan aturan NAT di Linux.</li>
+        <li><strong>arp</strong> – memeriksa tabel ARP untuk konflik alamat MAC.</li>
+        <li><strong>tcpdump / wireshark</strong> – menganalisis lalu lintas paket secara mendalam.</li>
+    </ul>
+
+    <div class="note">
+        <p><strong>💡 Praktik terbaik:</strong> Mulailah dengan <code>ping</code> ke gateway (192.168.88.1). Jika gagal, masalah ada di lapisan 2 (switch/kabel) atau konfigurasi IP client. Jika berhasil, lanjutkan ping ke IP publik (misal 8.8.8.8). Jika gagal, periksa aturan NAT dan routing pada router.</p>
+    </div>
+
+    <h3>4. Interpretasi Pesan PING</h3>
+    <p>Hasil perintah <strong>ping</strong> memberikan petunjuk penting tentang status jaringan:</p>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Pesan</th><th>Arti &amp; Tindakan</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><em>Reply from ...</em></td>
+                    <td>Koneksi berhasil – tidak ada masalah.</td>
+                </tr>
+                <tr>
+                    <td><em>Destination Unreachable</em></td>
+                    <td>Host tujuan tidak dapat dijangkau. Periksa rute, gateway, dan pastikan tujuan aktif.</td>
+                </tr>
+                <tr>
+                    <td><em>Time Exceeded</em></td>
+                    <td>TTL (Time To Live) habis – kemungkinan ada loop routing atau hop terlalu banyak.</td>
+                </tr>
+                <tr>
+                    <td><em>Redirect</em></td>
+                    <td>Router memberi tahu bahwa ada jalur lebih baik – biasanya bukan indikasi masalah serius.</td>
+                </tr>
+                <tr>
+                    <td><em>Request Timed Out</em></td>
+                    <td>Tidak ada balasan dari tujuan. Periksa firewall yang memblokir ICMP, atau host mati.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>B. Teknik Konfigurasi Ulang &amp; Perbaikan Internet Gateway</h2>
+
+    <h3>1. Verifikasi Konfigurasi Dasar</h3>
+    <p>Langkah pertama dalam perbaikan adalah memastikan konfigurasi dasar sudah benar:</p>
+    <ul>
+        <li>Periksa IP address, netmask, dan gateway pada setiap interface.</li>
+        <li>Pastikan <strong>IP forwarding</strong> aktif. Pada Linux: <code>echo 1 &gt; /proc/sys/net/ipv4/ip_forward</code> (atau edit <code>/etc/sysctl.conf</code>).</li>
+        <li>Pada router Mikrotik, pastikan <strong>NAT rule</strong> untuk masquerade sudah dibuat: <code>IP → Firewall → NAT → add chain=srcnat action=masquerade out-interface=Ether1-publik</code>.</li>
+    </ul>
+
+    <h3>2. Mengatasi NAT yang Tidak Berfungsi</h3>
+    <p>Jika klien tidak bisa akses internet meskipun gateway bisa di-<em>ping</em>, kemungkinan NAT bermasalah. Berikut langkah perbaikannya:</p>
+    <ul>
+        <li><strong>Cek aturan NAT</strong> – pastikan ada rule dengan action MASQUERADE atau SNAT pada interface publik.</li>
+        <li><strong>Periksa koneksi tracking</strong> – pada Linux, <code>conntrack -L</code> untuk melihat tabel koneksi; jika penuh, tingkatkan ukuran <code>net.netfilter.nf_conntrack_max</code>.</li>
+        <li><strong>Uji dengan ping dari router ke internet</strong> – jika router bisa ping 8.8.8.8, masalah ada di NAT atau firewall pada router.</li>
+        <li><strong>Periksa routing</strong> – pastikan default route mengarah ke gateway ISP.</li>
+    </ul>
+
+    <h3>3. Port Forwarding untuk Akses Server dari Luar</h3>
+    <p>Jika server di jaringan lokal (misal 192.168.88.10) perlu diakses dari internet, gunakan <strong>port forwarding</strong> (DNAT). Contoh pada Mikrotik:</p>
+    <pre>
+/ip firewall nat
+add chain=dstnat dst-address=202.123.123.100 protocol=tcp dst-port=80 \
+    action=dst-nat to-addresses=192.168.88.10 to-ports=80
+    </pre>
+    <p>Pada Linux dengan iptables:</p>
+    <pre>
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination 192.168.88.10:80
+iptables -A FORWARD -p tcp -d 192.168.88.10 --dport 80 -j ACCEPT
+    </pre>
+    <p>Pastikan juga ada aturan FORWARD yang mengizinkan lalu lintas masuk ke server internal.</p>
+
+    <h3>4. Firewall dan Filtering</h3>
+    <p>Kadang firewall di router atau server memblokir akses. Periksa:</p>
+    <ul>
+        <li>Aturan <strong>INPUT</strong> – jangan sampai memblokir paket dari client atau internet.</li>
+        <li>Aturan <strong>FORWARD</strong> – harus mengizinkan paket yang melalui router (dari LAN ke WAN dan sebaliknya).</li>
+        <li>Jika menggunakan stateful firewall, pastikan aturan <code>RELATED,ESTABLISHED</code> diizinkan.</li>
+    </ul>
+
+    <h3>5. Masalah DNS</h3>
+    <p>Jika klien bisa ping ke IP publik tetapi tidak bisa mengakses website, DNS tidak berfungsi. Solusi:</p>
+    <ul>
+        <li>Pastikan DNS server di client (misal 192.168.88.1) dapat diakses dan berfungsi.</li>
+        <li>Uji dengan <code>nslookup google.com</code> dari client.</li>
+        <li>Jika DNS server internal bermasalah, set sementara DNS publik (8.8.8.8) di client untuk pengujian.</li>
+    </ul>
+
+    <h3>6. Langkah Praktis Perbaikan pada Router Mikrotik</h3>
+    <ul>
+        <li>Login ke Winbox atau WebFig.</li>
+        <li>Cek <strong>Interface</strong> – pastikan Ether1 dan Ether2 aktif (status running).</li>
+        <li>Cek <strong>IP → Addresses</strong> – pastikan IP publik dan lokal terpasang dengan benar.</li>
+        <li>Cek <strong>IP → Routes</strong> – pastikan ada default route dengan gateway ISP.</li>
+        <li>Cek <strong>IP → Firewall → NAT</strong> – pastikan rule masquerade ada dan aktif.</li>
+        <li>Gunakan <strong>Tools → Ping</strong> dari router ke 8.8.8.8 untuk verifikasi koneksi.</li>
+        <li>Jika semua sudah benar tetapi client tetap tidak bisa, periksa <strong>Bridge</strong> atau <strong>Switch</strong> jika menggunakan konfigurasi yang kompleks.</li>
+    </ul>
+
+    <div class="note">
+        <p><strong>📌 Catatan penting:</strong> Setelah melakukan perubahan konfigurasi, selalu lakukan <strong>testing dari sisi client</strong> (ping, traceroute, browsing) untuk memastikan perbaikan berhasil. Jangan lupa untuk menyimpan konfigurasi (<code>/system backup save</code> pada Mikrotik) agar tidak hilang setelah reboot.</p>
+    </div>
+
+    <h2>C. Studi Kasus Troubleshooting NAT</h2>
+    <p><strong>Kasus:</strong> Client di jaringan 192.168.88.0/24 tidak bisa mengakses internet, tetapi gateway (192.168.88.1) bisa di-ping. Router Mikrotik juga bisa ping ke 8.8.8.8.</p>
+    <p><strong>Analisis:</strong> Karena gateway bisa di-ping, kemungkinan masalah ada di NAT atau aturan firewall FORWARD.</p>
+    <p><strong>Langkah penyelesaian:</strong></p>
+    <ol>
+        <li>Periksa aturan NAT di Mikrotik: <code>IP → Firewall → NAT</code>. Ternyata rule masquerade tidak ada.</li>
+        <li>Tambahkan rule: <code>chain=srcnat out-interface=Ether1-publik action=masquerade</code>.</li>
+        <li>Verifikasi dengan ping dari client ke 8.8.8.8 – berhasil.</li>
+        <li>Uji browsing – berhasil.</li>
+        <li>Dokumentasikan penambahan rule untuk referensi tim.</li>
+    </ol>
+    <p><strong>Kasus lain:</strong> Server web di 192.168.88.10 tidak bisa diakses dari internet meskipun port forwarding sudah dibuat.</p>
+    <p><strong>Solusi:</strong> Periksa apakah ada aturan firewall INPUT atau FORWARD yang memblokir port 80. Tambahkan aturan ACCEPT untuk port 80 pada chain FORWARD, dan pastikan server lokal memiliki gateway yang benar (192.168.88.1).</p>
+
+    <h2>Kesimpulan</h2>
+    <p>Troubleshooting pada gateway dan NAT membutuhkan pendekatan sistematis, mulai dari pemeriksaan fisik hingga konfigurasi logis. Dengan memahami fungsi NAT, routing, dan firewall, serta menggunakan tools diagnostik yang tepat, sebagian besar permasalahan dapat diidentifikasi dan diselesaikan dengan cepat. Selalu dokumentasikan setiap perubahan dan solusi untuk memperkaya basis pengetahuan tim dan mempercepat proses penanganan di masa depan.</p>
+
+    <div class="footer"></div>
+</div>
+</body>
+</html>
